@@ -44,13 +44,28 @@ struct ByteTest {
             }
         }
         
-        @Test private func equal() {
+        @Test private func equal_correct() {
             do {
                 
                 let lower = try Byte(number: 100)
                 let upper = try Byte(number: 100)
                 
                 assert(lower == upper, "비교 테스트 (==)")
+                
+            } catch let byteError as Byte.Error {
+                assert(false, byteError.description)
+            } catch {
+                assert(false, "알 수 없는 형식의 에러")
+            }
+        }
+        
+        @Test private func equal_incorrect() {
+            do {
+                
+                let lower = try Byte(number: 100)
+                let upper = try Byte(number: 101)
+                
+                assert(lower != upper, "비교 테스트 (!=)")
                 
             } catch let byteError as Byte.Error {
                 assert(false, byteError.description)

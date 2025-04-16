@@ -27,7 +27,7 @@ struct Byte: CustomStringConvertible, BinaryStringConvertible, Comparable {
             }
         }
         
-        return true
+        return false
     }
     
     static func == (lhs: Byte, rhs: Byte) -> Bool {
@@ -36,21 +36,19 @@ struct Byte: CustomStringConvertible, BinaryStringConvertible, Comparable {
 
     
     var description: String {
-        var description = ""
-        var value = self.value
-        
-        while !value.isEmpty {
-            description += value.removeLast().description
-        }
-        return description
+        value.reduce("", { $0 + $1.description })
     }
     
     var int: Int {
         var int = 0
         var binaryValue = 1
         
-        for i in value {
-            int += i.rawValue * binaryValue
+        var value = self.value
+        
+        while !value.isEmpty {
+            let bit = value.removeLast()
+            int += bit.rawValue * binaryValue
+            
             binaryValue *= 2
         }
         
@@ -71,14 +69,18 @@ struct Byte: CustomStringConvertible, BinaryStringConvertible, Comparable {
         
         var number = number
         var value: [Bit] = Array(repeating: .off, count: Byte.size)
-        var index = 0
         
-        for index in 0..<Self.size {
+        for i in 1...Self.size {
             if number % 2 == 1 {
+                let index = Self.size - i
                 value[index].toggle()
             }
             
             number /= 2
+        }
+        
+        guard value.count == 8 else {
+            throw Byte.Error.invaild
         }
         
         self.value = value
@@ -86,12 +88,15 @@ struct Byte: CustomStringConvertible, BinaryStringConvertible, Comparable {
     
     enum Error: Swift.Error, CustomStringConvertible, Equatable {
         case overSize(value: Int)
+        case invaild
         case unknown
         
         var description: String {
             switch self {
             case .overSize(let value):
                 return "[사이즈 초과] \(Byte.max) bit를 초과했습니다. (\(value) bit)"
+            case .invaild:
+                return "지원하지 않는 형식"
             case .unknown:
                 return "알 수 없는 에러"
             }
